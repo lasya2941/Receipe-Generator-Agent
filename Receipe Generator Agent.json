@@ -1,0 +1,206 @@
+{
+  "name": "Receipe Generator Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "c04372f2-91e5-4dd5-8618-890064f5cb6d",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -624,
+        -16
+      ],
+      "id": "f42c5104-d9e6-4087-9da0-cfb03d63f842",
+      "name": "Webhook",
+      "webhookId": "c04372f2-91e5-4dd5-8618-890064f5cb6d"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6ca22cbc-7952-4e51-85cf-7368a6046ada",
+              "name": "Ingredients",
+              "value": "={{ $json }}",
+              "type": "string"
+            },
+            {
+              "id": "9605e16c-ac48-4b26-9129-94d16d51038a",
+              "name": "Diet preference",
+              "value": "={{ $json }}",
+              "type": "string"
+            },
+            {
+              "id": "321c637f-59eb-4631-b7e3-1970f841c872",
+              "name": "Cooking Time",
+              "value": "={{ $json }}",
+              "type": "string"
+            },
+            {
+              "id": "23299ba7-32e5-4c28-9777-dd5e9a61c712",
+              "name": "Cuisine",
+              "value": "={{ $json }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -416,
+        -16
+      ],
+      "id": "cece0aae-89aa-4985-a5f0-25f400a63e6f",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a professional Recipe Generator Agent.\n\nYour task:\n1. Analyze available kitchen ingredients.\n2. Consider dietary preferences.\n3. Suggest suitable recipes.\n4. Provide cooking time and difficulty level.\n5. Give step-by-step cooking instructions.\n6. Suggest substitute ingredients if something is missing.\n\nAlways return:\n- Recipe Name\n- Cuisine Type\n- Required Ingredients\n- Missing Ingredients\n- Substitute Options\n- Preparation Time\n- Cooking Steps\n- Nutrition Tips \n{{ $json.Ingredients }}\n\n{{ $json[\"Diet preference\"] }}\n{{ $json[\"Cooking Time\"] }}\n\n\n{{ $json.Cuisine }}\n\n\n\n",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -208,
+        -16
+      ],
+      "id": "625f51f5-ba91-429d-b24d-3801f21d0733",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        -208,
+        176
+      ],
+      "id": "182a0752-9913-4fb9-abaa-4ede2672f3ee",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "P8cnHBo2Vc8MMcpT",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "html": "\n{{ $json.output }}\n\n\n\n\n"
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        112,
+        -16
+      ],
+      "id": "bcb8fc4b-d58b-46fa-a1f8-90a0e0f7c15d",
+      "name": "HTML"
+    },
+    {
+      "parameters": {
+        "fromEmail": "lasya2941@gmail.com",
+        "toEmail": "lasya2941@gmail.com",
+        "subject": "Receipe",
+        "emailFormat": "text",
+        "text": "={{ $json.html }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        320,
+        -16
+      ],
+      "id": "86d1702a-409e-4df0-81c0-5c6a0fd6aa55",
+      "name": "Send an Email",
+      "webhookId": "df3bb197-8ed9-4b18-ab8a-7ce2ede3627d",
+      "credentials": {
+        "smtp": {
+          "id": "bXVPx4hiboFf6a4s",
+          "name": "SMTP account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML": {
+      "main": [
+        [
+          {
+            "node": "Send an Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "f7adbade-c904-4dca-95d0-61ece8d7b3a4",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7aa2aa048802ccd608595979097735b04c7d56343db9f3c926379994db020ec3"
+  },
+  "nodeGroups": [],
+  "id": "JTzhCNyUtxBFgKz3",
+  "tags": []
+}
